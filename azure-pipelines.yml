@@ -1,0 +1,33 @@
+trigger:
+- main  # Altere para o nome do seu branch principal
+
+pool:
+  name: testesunitarios
+
+jobs:
+- job: 'Build'
+  displayName: 'Build job'
+  steps:
+
+  - script: echo 'Instalando dependências do PHP'
+    displayName: 'Instalar dependências'
+    # Adicione os comandos necessários para instalar as dependências do PHP, como o Composer.
+    # Exemplo: composer install
+
+  - script: echo 'Compilando o projeto PHP'
+    displayName: 'Compilar'
+    # Adicione os comandos necessários para compilar o projeto PHP.
+    # Exemplo: php -v
+
+  - task: ArchiveFiles@2
+    displayName: 'Arquivar artefatos'
+    inputs:
+      rootFolderOrFile: '$(System.DefaultWorkingDirectory)'
+      includeRootFolder: false
+      archiveFile: '$(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip'
+    # Este passo arquiva todos os arquivos do diretório de compilação em um arquivo zip.
+
+  - publish: $(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip
+    displayName: 'Publicar artefato'
+    # Este passo publica o arquivo zip como um artefato.
+    artifact: drop
