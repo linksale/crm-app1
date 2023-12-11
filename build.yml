@@ -1,0 +1,150 @@
+trigger:
+- main
+
+jobs:
+- job: RestoreDependencies
+  displayName: 'Restore Dependencies Job'
+  pool:
+    vmImage: 'ubuntu-latest'
+  demands:
+    - msbuild
+    - visualstudio
+  timeoutInMinutes: 10
+  cancelTimeoutInMinutes: 5
+  steps:
+  - checkout: self
+    submodules: recursive
+
+  # Tarefa para restaurar dependências PHP (Laravel usando Composer)
+  - script: |
+      cd path/to/your/laravel/project
+      php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
+      php composer-setup.php
+      php -r "unlink('composer-setup.php');"
+      php composer.phar install
+      echo "##vso[task.setvariable variable=ComposerInstallPath]$(pwd)/path/to/your/laravel/project/vendor"
+    displayName: 'Restore PHP Dependencies'
+
+- job: RunTests
+  displayName: 'Run Tests Job'
+  dependsOn: BuildProject
+  pool:
+    vmImage: 'ubuntu-latest'
+  demands:
+    - vstest
+  timeoutInMinutes: 15
+  cancelTimeoutInMinutes: 7
+  steps:
+  - checkout: self
+
+  # Tarefa para executar os testes
+  - script: |
+      # Comandos para executar testes (ajuste conforme necessário)
+      phpunit --log-junit TEST-Result.xml
+      php artisan test
+      php vendor/bin/phpunit path/to/your/test/FileTest.php
+    displayName: 'Run Tests'
+
+  # Publicar resultados dos testes para o Azure Boards
+  - task: PublishTestResults@2
+    displayName: 'Publish Test Results'
+    inputs:
+      testRunner: 'JUnit'
+      testResultsFiles: '**/TEST-*.xml'
+      mergeTestResults: true
+      failTaskOnFailedTests: true
+
+- job: RunMigrations
+  displayName: 'Run Migrations Job'
+  dependsOn: BuildProject
+  pool:
+    vmImage: 'ubuntu-latest'
+  demands:
+    - msbuild
+  timeoutInMinutes: 8
+  cancelTimeoutInMinutes: 4
+  steps:
+  - checkout: self
+
+  # Tarefa para executar as migrations
+  - script: |
+      php artisan migrate --force
+    displayName: 'Run Migrations'
+
+jobs:
+- job: SeedDatabase
+  displayName: 'Seed Database Job'
+  pool:
+    vmImage: 'windows-latest'  # Use uma imagem do Windows se necessário
+  steps:
+  - checkout: self
+
+  # Instalação do Composer e dependências PHP
+  - task: UsePhp@2
+    displayName: 'Use PHP'
+    inputs:
+      version: '7.x'  # ou a versão do PHP que você está usando
+
+  - script: |
+      php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
+      php composer-setup.php
+      php -r "unlink('composer-setup.php');"
+      php composer.phar install
+    displayName: 'Install Composer Dependencies'
+
+  # Criação de novo Seeder para usuários
+  - script: |
+      php artisan make:seeder UsersTableSeeder
+    displayName: 'Create Users Seeder'
+
+  # Criação de novo Seeder para produtos
+  - script: |
+      php artisan make:seeder ProductsTableSeeder
+    displayName: 'Create Products Seeder'
+
+  # Execução dos seeders
+  - script: |
+      php artisan migrate:fresh --seed
+    displayName: 'Run Seeders'
+
+  # Tarefa para reiniciar a VM ou executar outras ações pós-seed
+  - task: PowerShell@2
+    displayName: 'Restart VM or other post-seed actions'
+    inputs:
+      targetType: 'inline'
+      script: |
+
+# Tarefa para publicar resultados no Azure Boards
+  - task: PublishTestResults@2
+    displayName: 'Publish Test Results'
+    inputs:
+      testRunner: 'VSTest'
+      testResultsFiles: '**/TestResults/*.trx'
+      searchFolder: '$(System.DefaultWorkingDirectory)'
+      mergeTestResults: true
+      failTaskOnFailedTests: true      
+
+- job: BuildAndPublish
+  displayName: 'Build and Publish Job'
+  dependsOn: RestoreDependencies
+  pool:
+    vmImage: 'ubuntu-latest'
+  demands:
+    - msbuild
+  timeoutInMinutes: 20
+  cancelTimeoutInMinutes: 10
+  steps:
+  - checkout: self
+
+  # Comandos de build específicos para o PHP (Laravel)
+  - script: |
+      php artisan build
+    displayName: 'Build PHP Project'
+
+  # Tarefa para publicar artefatos
+  - task: PublishBuildArtifacts@1
+    inputs:
+      pathtoPublish: 'path/to/artifacts'
+      artifactName: 'drop'
+      publishLocation: 'Container'
+    displayName: 'Publish PHP Artifacts'
