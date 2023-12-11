@@ -1,6 +1,9 @@
 trigger:
 - main
 
+pool:
+  vmImage: 'ubuntu-latest'
+
 jobs:
 - job: RestoreDependencies
   displayName: 'Restore Dependencies Job'
@@ -8,7 +11,7 @@ jobs:
     vmImage: 'ubuntu-latest'
   demands:
     - msbuild
-    - visualstudio
+ 
   timeoutInMinutes: 10
   cancelTimeoutInMinutes: 5
   steps:
@@ -28,8 +31,7 @@ jobs:
 - job: RunTests
   displayName: 'Run Tests Job'
   dependsOn: BuildProject
-  pool:
-    vmImage: 'ubuntu-latest'
+  
   demands:
     - vstest
   timeoutInMinutes: 15
@@ -57,8 +59,7 @@ jobs:
 - job: RunMigrations
   displayName: 'Run Migrations Job'
   dependsOn: BuildProject
-  pool:
-    vmImage: 'ubuntu-latest'
+
   demands:
     - msbuild
   timeoutInMinutes: 8
@@ -74,16 +75,14 @@ jobs:
 jobs:
 - job: SeedDatabase
   displayName: 'Seed Database Job'
-  pool:
-    vmImage: 'windows-latest'  # Use uma imagem do Windows se necessário
-  steps:
+ steps:
   - checkout: self
 
   # Instalação do Composer e dependências PHP
   - task: UsePhp@2
     displayName: 'Use PHP'
     inputs:
-      version: '7.x'  # ou a versão do PHP que você está usando
+      version: ' 8.2.4'  # ou a versão do PHP que você está usando
 
   - script: |
       php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
@@ -127,8 +126,6 @@ jobs:
 - job: BuildAndPublish
   displayName: 'Build and Publish Job'
   dependsOn: RestoreDependencies
-  pool:
-    vmImage: 'ubuntu-latest'
   demands:
     - msbuild
   timeoutInMinutes: 20
