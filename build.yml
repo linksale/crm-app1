@@ -7,11 +7,6 @@ pool:
 jobs:
 - job: RestoreDependencies
   displayName: 'Restore Dependencies Job'
-  pool:
-    vmImage: 'ubuntu-latest'
-  demands:
-    - msbuild
- 
   timeoutInMinutes: 10
   cancelTimeoutInMinutes: 5
   steps:
@@ -31,9 +26,6 @@ jobs:
 - job: RunTests
   displayName: 'Run Tests Job'
   dependsOn: BuildProject
-  
-  demands:
-    - vstest
   timeoutInMinutes: 15
   cancelTimeoutInMinutes: 7
   steps:
@@ -59,9 +51,6 @@ jobs:
 - job: RunMigrations
   displayName: 'Run Migrations Job'
   dependsOn: BuildProject
-
-  demands:
-    - msbuild
   timeoutInMinutes: 8
   cancelTimeoutInMinutes: 4
   steps:
@@ -72,17 +61,18 @@ jobs:
       php artisan migrate --force
     displayName: 'Run Migrations'
 
-jobs:
 - job: SeedDatabase
   displayName: 'Seed Database Job'
- steps:
+  pool:
+    vmImage: 'windows-latest'  # Use uma imagem do Windows se necessário
+  steps:
   - checkout: self
 
   # Instalação do Composer e dependências PHP
   - task: UsePhp@2
     displayName: 'Use PHP'
     inputs:
-      version: ' 8.2.4'  # ou a versão do PHP que você está usando
+      version: '7.x'  # ou a versão do PHP que você está usando
 
   - script: |
       php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
@@ -126,8 +116,6 @@ jobs:
 - job: BuildAndPublish
   displayName: 'Build and Publish Job'
   dependsOn: RestoreDependencies
-  demands:
-    - msbuild
   timeoutInMinutes: 20
   cancelTimeoutInMinutes: 10
   steps:
