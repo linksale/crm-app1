@@ -4,6 +4,9 @@ trigger:
 pool:
   vmImage: 'ubuntu-latest'
 
+  strategy:
+    parallel: none
+
 jobs:
 - job: RestoreDependencies
   displayName: 'Restore Dependencies Job'
@@ -130,5 +133,3 @@ jobs:
       publishLocation: 'Container'
     displayName: 'Publish PHP Artifacts'
   
-strategy:
-    parallel: none
