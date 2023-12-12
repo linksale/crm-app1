@@ -7,6 +7,8 @@ pool:
 jobs:
 - job: RestoreDependencies
   displayName: 'Restore Dependencies Job'
+  strategy:
+    parallel: none 
   timeoutInMinutes: 10
   cancelTimeoutInMinutes: 5
   steps:
@@ -20,10 +22,13 @@ jobs:
       composer install
     displayName: 'Restore PHP Dependencies'
      
-     
+       strategy:
+    parallel: none 
 
 - job: RunTests
   displayName: 'Run Tests Job'
+  strategy:
+    parallel: none 
   dependsOn: RestoreDependencies
   timeoutInMinutes: 15
   cancelTimeoutInMinutes: 7
@@ -37,7 +42,8 @@ jobs:
       php artisan test
       php vendor/bin/phpunit tests/unit/UserTest.php
     displayName: 'Run Tests'
-
+strategy:
+    parallel: none 
   # Publicar resultados dos testes para o Azure Boards
   - task: PublishTestResults@2
     displayName: 'Publish Test Results'
@@ -50,6 +56,8 @@ jobs:
 - job: RunMigrations
   displayName: 'Run Migrations Job'
   dependsOn: RunTests
+    strategy:
+    parallel: none 
   timeoutInMinutes: 8
   cancelTimeoutInMinutes: 4
   steps:
@@ -111,6 +119,8 @@ jobs:
   dependsOn:
     - RunTests
     - RunMigrations
+      strategy:
+    parallel: none 
   timeoutInMinutes: 20
   cancelTimeoutInMinutes: 10
   steps:
