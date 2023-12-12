@@ -41,8 +41,7 @@ jobs:
       php artisan test
       php vendor/bin/phpunit tests/unit/UserTest.php
     displayName: 'Run Tests'
-strategy:
-    parallel: none 
+
   # Publicar resultados dos testes para o Azure Boards
   - task: PublishTestResults@2
     displayName: 'Publish Test Results'
