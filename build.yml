@@ -24,7 +24,7 @@ jobs:
 
 - job: RunTests
   displayName: 'Run Tests Job'
-  dependsOn: BuildProject
+  dependsOn: RestoreDependencies
   timeoutInMinutes: 15
   cancelTimeoutInMinutes: 7
   steps:
@@ -49,7 +49,7 @@ jobs:
 
 - job: RunMigrations
   displayName: 'Run Migrations Job'
-  dependsOn: BuildProject
+  dependsOn: RunTests
   timeoutInMinutes: 8
   cancelTimeoutInMinutes: 4
   steps:
@@ -66,12 +66,6 @@ jobs:
     vmImage: 'windows-latest'  # Use uma imagem do Windows se necessário
   steps:
   - checkout: self
-
-  # Instalação do Composer e dependências PHP
-  - task: UsePhp@2
-    displayName: 'Use PHP'
-    inputs:
-      version: '7.x'  # ou a versão do PHP que você está usando
 
   - script: |
       php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
@@ -114,7 +108,7 @@ jobs:
 
 - job: BuildAndPublish
   displayName: 'Build and Publish Job'
-  dependsOn: RestoreDependencies
+  dependsOn: PublishTestResults@2
   timeoutInMinutes: 20
   cancelTimeoutInMinutes: 10
   steps:
