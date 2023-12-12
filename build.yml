@@ -13,15 +13,14 @@ jobs:
   - checkout: self
     submodules: recursive
 
+  
   # Tarefa para restaurar dependências PHP (Laravel usando Composer)
   - script: |
-      cd path/to/your/laravel/project
-      php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
-      php composer-setup.php
-      php -r "unlink('composer-setup.php');"
-      php composer.phar install
-      echo "##vso[task.setvariable variable=ComposerInstallPath]$(pwd)/path/to/your/laravel/project/vendor"
+      cd src/Laravel
+      composer install
     displayName: 'Restore PHP Dependencies'
+     
+     
 
 - job: RunTests
   displayName: 'Run Tests Job'
@@ -36,7 +35,7 @@ jobs:
       # Comandos para executar testes (ajuste conforme necessário)
       phpunit --log-junit TEST-Result.xml
       php artisan test
-      php vendor/bin/phpunit path/to/your/test/FileTest.php
+      php vendor/bin/phpunit tests/unit/UserTest.php
     displayName: 'Run Tests'
 
   # Publicar resultados dos testes para o Azure Boards
