@@ -108,7 +108,9 @@ jobs:
 
 - job: BuildAndPublish
   displayName: 'Build and Publish Job'
-  dependsOn: PublishTestResults@2
+  dependsOn:
+    - RunTests
+    - RunMigrations
   timeoutInMinutes: 20
   cancelTimeoutInMinutes: 10
   steps:
