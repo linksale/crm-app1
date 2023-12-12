@@ -22,7 +22,7 @@ jobs:
       composer install
     displayName: 'Restore PHP Dependencies'
      
-       strategy:
+  strategy:
     parallel: none 
 
 - job: RunTests
