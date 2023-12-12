@@ -67,8 +67,6 @@ jobs:
 
 - job: SeedDatabase
   displayName: 'Seed Database Job'
-  pool:
-    vmImage: 'windows-latest'  # Use uma imagem do Windows se necessário
   steps:
   - checkout: self
 
