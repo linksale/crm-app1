@@ -28,7 +28,7 @@ jobs:
 - job: RunTests
   displayName: 'Run Tests Job'
   
-  dependsOn: RestoreDependencies
+ 
   timeoutInMinutes: 15
   cancelTimeoutInMinutes: 7
   steps:
@@ -54,7 +54,7 @@ jobs:
 - job: RunMigrations
   displayName: 'Run Migrations Job'
   
-  dependsOn: RunTests
+ 
   timeoutInMinutes: 8
   cancelTimeoutInMinutes: 4
   steps:
@@ -113,9 +113,7 @@ jobs:
 
 - job: BuildAndPublish
   displayName: 'Build and Publish Job'
-  dependsOn:
-    - RunTests
-    - RunMigrations
+
   steps:
   - checkout: self
 
