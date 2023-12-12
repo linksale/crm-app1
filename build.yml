@@ -129,5 +129,6 @@ jobs:
       artifactName: 'drop'
       publishLocation: 'Container'
     displayName: 'Publish PHP Artifacts'
-  strategy:
+  
+strategy:
     parallel: none
