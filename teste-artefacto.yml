@@ -11,7 +11,6 @@ pool:
 variables:
   phpVersion: 8.2.4
 
-
 stages:
 - stage: BuildAndAnalyze
   jobs:
@@ -20,25 +19,22 @@ stages:
     steps:
     - checkout: self
 
-    # Instalação do Composer e dependências PHP
     - script: |
-        cd crm-app
         php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
         php composer-setup.php
         php -r "unlink('composer-setup.php');"
         php composer.phar install
-        echo "##vso[task.setvariable variable=ComposerInstallPath]$(pwd)/path/to/your/laravel/project/vendor"
-      displayName: 'Restore PHP Dependencies'
+        echo "##vso[task.setvariable variable=ComposerInstallPath]%CD%/crm-app1/vendor"
+      displayName: 'Install Composer Dependencies'
 
     # Comandos de build específicos para o PHP (Laravel)
     - script: |
         php artisan build
       displayName: 'Build PHP Project'
 
-    - task: PublishTestResults@2
-      displayName: 'Publish Test Results'
+    - task: PublishBuildArtifacts@1
       inputs:
-        testRunner: 'JUnit'
-        testResultsFiles: '**/TEST-*.xml'
-        mergeTestResults: true
-        failTaskOnFailedTests: true
+        pathtoPublish: 'crm-app1'  # Substitua pelo caminho real dos seus artefatos
+        artifactName: 'drop'
+        publishLocation: 'Container'
+      displayName: 'Publish Build Artifacts'
